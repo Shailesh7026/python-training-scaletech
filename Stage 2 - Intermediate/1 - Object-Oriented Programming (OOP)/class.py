@@ -25,7 +25,7 @@ p1._Phone__price = 0 # This gone edit the price
 
 print(p1.description())
 
-# print(p1.__dict__)
+print(p1.__dict__)
 print(str(p1))
 print(repr(p1))
 
