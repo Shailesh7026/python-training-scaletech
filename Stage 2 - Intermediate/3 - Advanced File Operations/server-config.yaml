@@ -1,0 +1,9 @@
+author:
+  contact: shailesh@gmail.com
+  name: Shailesh
+database:
+  pool: '100'
+  url: postgres://user:password@host:port/database
+server:
+  host: 127.0.0.1
+  port: 8000
