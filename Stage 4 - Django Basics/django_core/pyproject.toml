@@ -1,0 +1,16 @@
+[project]
+name = "django-core"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "shailesh", email = "prajapatishailesh4941@gmail.com" }
+]
+requires-python = ">=3.14.7"
+dependencies = [
+    "django>=6.1.1",
+]
+
+[project.scripts]
+django-core = "django_core:main"
+

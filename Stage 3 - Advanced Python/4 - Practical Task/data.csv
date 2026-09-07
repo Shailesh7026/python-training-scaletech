@@ -1,0 +1,16 @@
+Transaction_ID,Date,Customer_ID,Customer_Type,Product_Category,Quantity,Unit_Price,Discount_Pct,Payment_Method,Rating
+T1001,2026-01-02,C5042,Premium,Electronics,1,1200.00,0.10,Credit Card,4.8
+T1002,2026-01-02,C1023,Standard,Clothing,3,45.00,0.00,PayPal,3.5
+T1003,2026-01-03,C8831,Standard,Home & Kitchen,2,80.00,0.05,Credit Card,4.2
+T1004,2026-01-03,C5042,Premium,Clothing,1,120.00,0.15,Credit Card,5.0
+T1005,2026-01-04,C3321,Standard,Electronics,1,600.00,0.00,Cash,3.9
+T1006,2026-01-05,C2114,Premium,Home & Kitchen,4,25.00,0.10,Credit Card,4.6
+T1007,2026-01-06,C1023,Standard,Electronics,2,150.00,0.00,PayPal,4.1
+T1008,2026-01-06,C9041,Standard,Beauty,1,90.00,0.05,Cash,2.8
+T1009,2026-01-07,C7723,Premium,Clothing,2,65.00,0.20,Credit Card,4.7
+T1010,2026-01-07,C3321,Standard,Home & Kitchen,1,310.00,0.00,Cash,4.0
+T1011,2026-01-08,C5042,Premium,Beauty,3,40.00,0.10,Credit Card,4.9
+T1012,2026-01-09,C1023,Standard,Home & Kitchen,2,55.00,0.00,PayPal,3.8
+T1013,2026-01-10,C4412,Standard,Electronics,1,950.00,0.05,Credit Card,4.3
+T1014,2026-01-11,C2114,Premium,Clothing,5,30.00,0.10,Credit Card,4.5
+T1015,2026-01-12,C9041,Standard,Electronics,1,150.00,0.00,Cash,3.2
