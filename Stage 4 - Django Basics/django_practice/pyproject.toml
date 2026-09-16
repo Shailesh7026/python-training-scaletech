@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.14.7"
 dependencies = [
     "django>=6.1.1",
+    "django-tailwind>=4.5.0",
 ]
 
 [project.scripts]
@@ -17,3 +18,8 @@ django-practice = "django_practice:main"
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "cookiecutter>=2.7.1",
+]

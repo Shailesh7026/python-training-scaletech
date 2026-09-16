@@ -28,6 +28,15 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+TAILWIND_APP_NAME = 'theme'
+
+STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,7 +46,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'home'
+    'blogs',
+    'tailwind',
+    'theme',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +66,10 @@ ROOT_URLCONF = 'my_app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            # BASE_DIR / 'blogs'
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

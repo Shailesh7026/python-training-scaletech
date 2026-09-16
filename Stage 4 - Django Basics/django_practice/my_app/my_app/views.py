@@ -3,10 +3,7 @@ from django.http import HttpResponse
 from django.views import View
 # Create your views here.
 
-# functional view 
+# # functional view 
 def home(request):
-    return HttpResponse("Hello !!")
+    return render(request, 'base.html')
 
-class UserView(View):
-    def get(self,request):
-        return HttpResponse("Hello User !!")

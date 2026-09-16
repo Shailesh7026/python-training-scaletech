@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "title": "Getting Started with Tailwind CSS in Django",
+        "author": "Alex Rivera",
+        "category": "Web Development",
+        "content": "<p>Tailwind CSS is a <strong>utility-first</strong> CSS framework packed with classes like <code>flex</code>, <code>pt-4</code>, and <code>text-center</code>. When integrated with Django, it makes template design incredibly swift.</p>",
+        "summary": "Learn how to seamlessly integrate and style your Django templates with Tailwind CSS utility classes.",
+        "published_date": "2026-09-15T10:30:00Z",
+        "likes": 42,
+        "is_featured": true,
+        "tags": ["django", "tailwind", "frontend"]
+    },
+    {
+        "id": 2,
+        "title": "Mastering Django Template Filters",
+        "author": "Sam Smith",
+        "category": "Django Core",
+        "content": "<p>Django templates offer powerful filters out of the box. Filters like <code>|safe</code> allow raw HTML rendering, while <code>|truncatechars</code> manage text overflows gracefully.</p>",
+        "summary": "",
+        "published_date": "2026-09-16T14:15:00Z",
+        "likes": 1,
+        "is_featured": false,
+        "tags": ["templates", "python"]
+    },
+    {
+        "id": 3,
+        "title": "The Mystery Post",
+        "author": null,
+        "category": "General",
+        "content": "This post contains plain text without HTML layout, meant to test your fallback mechanics.",
+        "summary": "An anonymous piece testing missing values.",
+        "published_date": null,
+        "likes": 0,
+        "is_featured": false,
+        "tags": []
+    }
+]

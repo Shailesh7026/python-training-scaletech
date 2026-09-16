@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}All Posts{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Full Archive Feed</h1>
+    <p class="text-slate-500 mt-1">Showing popular blogs</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for blog in blogs %}
+    <div class="bg-white rounded-xl shadow border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition">
+        <div>
+            <!-- Header elements -->
+            <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                <span>{{ blog.category }}</span>
+                <span class="text-indigo-600">#{{ forloop.counter }}</span>
+            </div>
+            
+            <h2 class="text-xl font-bold text-slate-900 mb-3 hover:text-indigo-600 transition">
+                {{ blog.title }}
+            </h2>
+
+            {% comment %} Browser Safe conversion {% endcomment %}
+            <div class="text-sm text-slate-600 mb-6 space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                {{ blog.content|safe }}
+            </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 mt-auto">
+            {% comment %} Using default none to handel None  {% endcomment %}
+            <p class="text-xs text-slate-500 mb-2">
+                Author: <span class="font-semibold text-slate-700">{{ blog.author|default_if_none:"Anonymous Profile" }}</span>
+            </p>
+            
+            <div class="flex justify-between items-center text-xs text-slate-400">
+                <span>{{ blog.published_date|date:"F j, Y"|default:"Draft" }}</span>
+                <span class="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-full">
+                    👍 {{ blog.likes }} Like{{ blog.likes|pluralize }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <!-- Fallback code -->
+    <div class="col-span-full bg-white rounded-xl border border-dashed border-slate-300 p-12 text-center">
+        <p class="text-slate-500 text-lg font-medium">No published records present in database memory.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
