@@ -1,0 +1,2232 @@
+{
+  "info": {
+    "_postman_id": "081f707a-7694-4748-9640-37abcbb10124",
+    "name": "Django RBAC - Users, Roles & Students",
+    "description": "Postman test collection for Django session-authenticated RBAC APIs. Set baseUrl, adminEmail, adminPassword, teacherEmail, teacherPassword, studentEmail, studentPassword and student2Email/student2Password as collection variables before running. Assumes /api/v1/auth/login/, /api/v1/users/, /api/v1/roles/ and /api/v1/students/ routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "28047021",
+    "_collection_link": "https://go.postman.co/collection/28047021-081f707a-7694-4748-9640-37abcbb10124?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "00 - Setup and Superuser authentication",
+      "item": [
+        {
+          "name": "00 - Get Django CSRF cookie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Django admin login page responds', function () { pm.expect(pm.response.code).to.be.oneOf([200, 302]); });",
+                  "pm.test('CSRF cookie is available for subsequent unsafe requests', function () {",
+                  "  const csrf = pm.cookies.get('csrftoken');",
+                  "  pm.expect(csrf, 'csrftoken cookie').to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            },
+            "description": "Bootstrap the Django CSRF cookie. Postman should retain the cookie for the same host."
+          },
+          "response": []
+        },
+        {
+          "name": "01 - Admin login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin login succeeds', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.test('Login response contains user', function () { pm.expect(data.user).to.exist; pm.expect(data.user.email).to.eql(pm.collectionVariables.get('adminEmail')); });",
+                  "pm.test('Admin account is superuser', function () { pm.expect(data.user.is_superuser).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": ""
+            },
+            "description": "Log in using the superuser created through createsuperuser or your custom manager."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Role CRUD and validation (admin session)",
+      "item": [
+        {
+          "name": "02 - Create  role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Teacher role created', function () { pm.response.to.have.status(201); });\nconst d = pm.response.json();\npm.test('Role response contains modules', function () { pm.expect(d.role.access_modules).to.include('students.create'); });\npm.collectionVariables.set('teacherRoleId', d.role.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_name\": \"Teacher\",\n  \"access_modules\": [\n    \"students.view\",\n    \"students.create\",\n    \"students.update\",\n    \"students.delete\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "02 - Create  role",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role_name\": \"Teacher\",\n  \"access_modules\": [\n    \"students.view\",\n    \"students.create\",\n    \"students.update\",\n    \"students.delete\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/roles/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:02:05 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "177"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Role created successfully\",\n  \"role\": {\n    \"id\": 4,\n    \"role_name\": \"Teacher\",\n    \"access_modules\": [\n      \"students.view\",\n      \"students.create\",\n      \"students.update\",\n      \"students.delete\"\n    ]\n  }\n}"
+            },
+            {
+              "name": "02 - Create  role",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role_name\": \"Student\",\n  \"access_modules\": [\n    \"students.view_own\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/roles/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:03:50 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "124"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Role created successfully\",\n  \"role\": {\n    \"id\": 5,\n    \"role_name\": \"Student\",\n    \"access_modules\": [\n      \"students.view_own\"\n    ]\n  }\n}"
+            },
+            {
+              "name": "02 - Reject duplicate role name (validation test)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role_name\": \"Student\",\n  \"access_modules\": [\n    \"students.view_own\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/roles/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ""
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:17:12 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "39"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Role name already exists\"\n}"
+            },
+            {
+              "name": "02 - Reject duplicate access module (validation test)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role_name\": \"Invalid Duplicate Modules\",\n  \"access_modules\": [\n    \"students.view\",\n    \"students.view\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/roles/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ""
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:20:46 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "128"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Validation failed\",\n  \"errors\": {\n    \"access_modules\": [\n      \"['students.view', 'students.view'] contains duplicate values\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "04 - List roles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Role list succeeds', function () { pm.response.to.have.status(200); });",
+                  "const d = pm.response.json();",
+                  "pm.test('Roles array and pagination exist', function () { pm.expect(d.roles).to.be.an('array'); pm.expect(d.pagination.total_records).to.be.a('number'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "04 - List roles",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/roles/?page=2&limit=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "2"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:06:24 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "262"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Role list fetched successfully\",\n  \"roles\": [\n    {\n      \"id\": 4,\n      \"role_name\": \"Teacher\",\n      \"access_modules\": [\n        \"students.view\",\n        \"students.create\",\n        \"students.update\",\n        \"students.delete\"\n      ]\n    }\n  ],\n  \"pagination\": {\n    \"page\": 2,\n    \"limit\": 1,\n    \"total_pages\": 3,\n    \"total_records\": 3\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "05 - Specific Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Role list succeeds', function () { pm.response.to.have.status(200); });\nconst d = pm.response.json();\npm.test('Roles array and pagination exist', function () { pm.expect(d.roles).to.be.an('array'); pm.expect(d.pagination.total_records).to.be.a('number'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "05 - Specific Role",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/roles/4",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    "4"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:09:57 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "177"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Role fetched successfully\",\n  \"role\": {\n    \"id\": 4,\n    \"role_name\": \"Teacher\",\n    \"access_modules\": [\n      \"students.view\",\n      \"students.create\",\n      \"students.update\",\n      \"students.delete\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "06 - Update  role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Role update succeeds', function () { pm.response.to.have.status(200); });\npm.expect(pm.response.json().role.access_modules).to.include('students.delete');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_name\": \"Teacher\",\n  \"access_modules\": [\n    \"students.view\",\n    \"students.create\",\n    \"students.update\",\n    \"students.delete\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "06 - Update Teacher role",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role_name\": \"Teacher\",\n  \"access_modules\": [\n    \"students.view\",\n    \"students.create\",\n    \"students.update\",\n    \"students.delete\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/roles/4",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "roles",
+                    "4"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:16:35 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "196"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Role updated successfully\",\n  \"role\": {\n    \"id\": 4,\n    \"role_name\": \"Teacher\",\n    \"access_modules\": [\n      \"students.view\",\n      \"students.create\",\n      \"students.update\",\n      \"students.delete\"\n    ],\n    \"is_active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "41 - Delete Teacher role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Teacher role deleted', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "40 - Delete Student role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student role deleted', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - User CRUD (admin session)",
+      "item": [
+        {
+          "name": "09 - Create Teacher user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Teacher user created', function () { pm.response.to.have.status(201); });",
+                  "const d = pm.response.json();",
+                  "pm.expect(d.user.role.roleName).to.eql('Teacher');",
+                  "pm.collectionVariables.set('teacherUserId', d.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{teacherEmail}}\",\n  \"password\": \"{{teacherPassword}}\",\n  \"first_name\": \"Taylor\",\n  \"last_name\": \"Teacher\",\n  \"role\": \"{{teacherRoleId}}\"\n}"
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "09 - Create Teacher user",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"teacher1@example.com\",\n  \"password\": \"Teacher@12345\",\n  \"first_name\": \"Shailesh\",\n  \"last_name\": \"Teacher\",\n  \"role\": \"4\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:52:21 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "161"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User created successfully\",\n  \"user\": {\n    \"id\": 7,\n    \"email\": \"teacher1@example.com\",\n    \"first_name\": \"Shailesh\",\n    \"last_name\": \"Teacher\",\n    \"role\": \"Teacher\"\n  }\n}"
+            },
+            {
+              "name": "09 - Create Duplicate Teacher user (validation)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"teacher1@example.com\",\n  \"password\": \"Teacher@12345\",\n  \"first_name\": \"Shailesh\",\n  \"last_name\": \"Teacher\",\n  \"role\": \"4\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:52:35 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "35"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Email already exists\"\n}"
+            },
+            {
+              "name": "09 - Create Teacher user",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Student@12345\",\n  \"first_name\": \"Sam\",\n  \"last_name\": \"Student\",\n  \"role\": \"5\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:54:41 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "155"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User created successfully\",\n  \"user\": {\n    \"id\": 8,\n    \"email\": \"student@example.com\",\n    \"first_name\": \"Sam\",\n    \"last_name\": \"Student\",\n    \"role\": \"Student\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "12 - Specific User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User list succeeds', function () { pm.response.to.have.status(200); });\nconst d = pm.response.json();\npm.test('User list contains nested role fields', function () {\n  pm.expect(d.users).to.be.an('array');\n  if (d.users.length) { pm.expect(d.users[0]).to.have.property('role'); }\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "12 - Specific User",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/6",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "6"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:58:47 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "194"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User fetched successfully\",\n  \"user\": {\n    \"id\": 6,\n    \"email\": \"admin@example.com\",\n    \"first_name\": \"\",\n    \"last_name\": \"\",\n    \"role_data\": {\n      \"id\": null,\n      \"role_name\": null,\n      \"access_modules\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "12 - List users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User list succeeds', function () { pm.response.to.have.status(200); });\nconst d = pm.response.json();\npm.test('User list contains nested role fields', function () {\n  pm.expect(d.users).to.be.an('array');\n  if (d.users.length) { pm.expect(d.users[0]).to.have.property('role'); }\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "12 - List users",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/?page=2&limit=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "2"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 11:57:41 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "279"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User list fetched successfully\",\n  \"users\": [\n    {\n      \"id\": 6,\n      \"email\": \"admin@example.com\",\n      \"first_name\": \"\",\n      \"last_name\": \"\",\n      \"role_data\": {\n        \"id\": null,\n        \"role_name\": null,\n        \"access_modules\": null\n      }\n    }\n  ],\n  \"pagination\": {\n    \"page\": 2,\n    \"limit\": 1,\n    \"total_pages\": 5,\n    \"total_records\": 5\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "14 - Update Teacher user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User update succeeds', function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json().user.last_name).to.eql('UpdatedTeacher');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"last_name\": \"UpdatedTeacher\"\n}"
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "14 - Update Teacher user",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"last_name\": \"UpdatedTeacher\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/5/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "5",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:02:39 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "304"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User updated successfully\",\n  \"user\": {\n    \"id\": 5,\n    \"email\": \"teacher@example.com\",\n    \"first_name\": \"Shailesh\",\n    \"last_name\": \"UpdatedTeacher\",\n    \"role\": {\n      \"id\": 4,\n      \"role_name\": \"Teacher\",\n      \"access_modules\": [\n        \"students.view\",\n        \"students.create\",\n        \"students.update\",\n        \"students.delete\"\n      ]\n    },\n    \"is_active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "38 - Delete Student user 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Second student user deleted', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Student CRUD (admin session)",
+      "item": [
+        {
+          "name": "15 - Create Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student profile created', function () { pm.response.to.have.status(201); });\nconst d = pm.response.json();\npm.collectionVariables.set('studentId', d.student.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{studentUserId}}\",\n  \"roll_number\": \"RBAC-STU-001\",\n  \"age\": 20,\n  \"course\": \"Computer Engineering\"\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "15 - Create Student",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": 8,\n  \"roll_number\": \"RBAC-STU-001\",\n  \"age\": 20,\n  \"course\": \"Computer Engineering\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/students/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ""
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:36:15 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "187"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Student created successfully\",\n  \"student\": {\n    \"id\": 5,\n    \"user_id\": 8,\n    \"email\": \"student@example.com\",\n    \"roll_number\": \"RBAC-STU-001\",\n    \"age\": 20,\n    \"course\": \"Computer Engineering\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "17 - List students (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin can list students', function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json().students).to.be.an('array');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "17 - List students (admin)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/students/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:36:29 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "333"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Students fetched successfully\",\n  \"students\": [\n    {\n      \"id\": 5,\n      \"user__id\": 8,\n      \"user__email\": \"student@example.com\",\n      \"user__first_name\": \"Sam\",\n      \"user__last_name\": \"Student\",\n      \"roll_number\": \"RBAC-STU-001\",\n      \"age\": 20,\n      \"course\": \"Computer Engineering\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total_pages\": 1,\n    \"total_records\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "18 - Get Specific Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student detail succeeds', function () { pm.response.to.have.status(200); });\npm.expect(pm.response.json().student.roll_number).to.eql('RBAC-STU-001');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "18 - Get Specific Student",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/students/5",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    "5"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:36:48 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "251"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Student fetched successfully\",\n  \"student\": {\n    \"id\": 5,\n    \"user__id\": 8,\n    \"user__email\": \"student@example.com\",\n    \"user__first_name\": \"Sam\",\n    \"user__last_name\": \"Student\",\n    \"roll_number\": \"RBAC-STU-001\",\n    \"age\": 20,\n    \"course\": \"Computer Engineering\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "19 - Update Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student update succeeds', function () { pm.response.to.have.status(200); });\npm.expect(pm.response.json().student.course).to.eql('Advanced Computer Engineering');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course\": \"Advanced Computer Engineering\",\n  \"age\": 21\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "19 - Update Student",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "aucuY1XGl1G13MnYjeIBPYHcTaH8t3Rg"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"course\": \"Advanced Computer Engineering\",\n  \"age\": 21\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/students/5/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    "5",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:37:28 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "182"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Student updated successfully\",\n  \"student\": {\n    \"id\": 5,\n    \"roll_number\": \"RBAC-STU-001\",\n    \"age\": 21,\n    \"course\": \"Advanced Computer Engineering\",\n    \"email\": \"student@example.com\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "39 - Delete Teacher user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Teacher user deleted', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Student permission tests",
+      "item": [
+        {
+          "name": "20 - Student login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student login succeeds', function () { pm.response.to.have.status(200); });\npm.expect(pm.response.json().user.email).to.eql(pm.collectionVariables.get('studentEmail'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "20 - Student login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "nyfcXxg1K0yp68AVTx2dTG1qiHye4UMv"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Student@12345\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "text"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:42:26 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "146"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "csrftoken=5AC3eWwmV07y744eO4YceIMFCHd9jDUT; expires=Sun, 31 Oct 2027 12:42:26 GMT; Max-Age=31449600; Path=/; SameSite=Lax"
+                },
+                {
+                  "key": "Set-Cookie",
+                  "value": "sessionid=s4qcjg19bu985kdq394gdqbrif37ma61; expires=Sun, 15 Nov 2026 12:42:26 GMT; HttpOnly; Max-Age=1209600; Path=/; SameSite=Lax"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Login successful\",\n  \"user\": {\n    \"id\": 8,\n    \"email\": \"student@example.com\",\n    \"first_name\": \"Sam\",\n    \"last_name\": \"Student\",\n    \"role\": \"Student\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "22 - Student can retrieve own profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student can view own record', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "22 - Student can retrieve own profile",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "nyfcXxg1K0yp68AVTx2dTG1qiHye4UMv"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/students/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:46:16 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "342"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Students fetched successfully\",\n  \"students\": [\n    {\n      \"id\": 5,\n      \"user__id\": 8,\n      \"user__email\": \"student@example.com\",\n      \"user__first_name\": \"Sam\",\n      \"user__last_name\": \"Student\",\n      \"roll_number\": \"RBAC-STU-001\",\n      \"age\": 21,\n      \"course\": \"Advanced Computer Engineering\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total_pages\": 1,\n    \"total_records\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "26 - Student cannot delete student profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Student cannot delete records', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": [
+            {
+              "name": "26 - Student cannot delete student profile",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-CSRFToken",
+                    "value": "GcUsZoznqsTnsSdgz1DJONx2bGaERWu2"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"tripId\":\"6a703330fdad1eabea8f964b\",\"passengerId\":\"passenger_123\",\"seatNumbers\":[\"1\",\"2\"]}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/students/5/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students",
+                    "5",
+                    ""
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Date",
+                  "value": "Sun, 01 Nov 2026 12:55:28 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "WSGIServer/0.2 CPython/3.14.7"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "59"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Cookie"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"You don't have permission to delete students\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const csrf = pm.cookies.get('csrftoken');",
+          "if (csrf) { pm.request.headers.upsert({ key: 'X-CSRFToken', value: csrf }); }"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "CHANGE_ME_ADMIN_PASSWORD"
+    },
+    {
+      "key": "teacherEmail",
+      "value": "teacher@example.com"
+    },
+    {
+      "key": "teacherPassword",
+      "value": "Teacher@12345"
+    },
+    {
+      "key": "studentEmail",
+      "value": "student@example.com"
+    },
+    {
+      "key": "studentPassword",
+      "value": "Student@12345"
+    },
+    {
+      "key": "student2Email",
+      "value": "student2@example.com"
+    },
+    {
+      "key": "student2Password",
+      "value": "Student2@12345"
+    },
+    {
+      "key": "teacherRoleId",
+      "value": ""
+    },
+    {
+      "key": "studentRoleId",
+      "value": ""
+    },
+    {
+      "key": "teacherUserId",
+      "value": ""
+    },
+    {
+      "key": "studentUserId",
+      "value": ""
+    },
+    {
+      "key": "student2UserId",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": ""
+    },
+    {
+      "key": "student2Id",
+      "value": ""
+    },
+    {
+      "key": "createdRoleId",
+      "value": ""
+    },
+    {
+      "key": "createdUserId",
+      "value": ""
+    }
+  ]
+}
