@@ -1,0 +1,21 @@
+[project]
+name = "user-auth-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "shailesh", email = "prajapatishailesh4941@gmail.com" }
+]
+requires-python = ">=3.14.7"
+dependencies = [
+    "cookiecutter>=2.7.1",
+    "django>=6.1.1",
+    "django-tailwind>=4.5.0",
+]
+
+[project.scripts]
+user-auth-project = "user_auth_project:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
